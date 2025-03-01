@@ -17,12 +17,16 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 # Install Prisma globally for CLI access
 RUN npm install -g prisma
 
+# Copy source code
 COPY . .
 
 # Generate Prisma Client
 RUN pnpm prisma generate
 
+# Build TypeScript files
+WORKDIR /app/src
 RUN pnpm run build
+WORKDIR /app
 
 # Use ARG for build-time port and ENV for runtime
 ARG PORT=5000
