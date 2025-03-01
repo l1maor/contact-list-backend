@@ -1,0 +1,37 @@
+FROM node:18-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    openssl \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json pnpm-lock.yaml ./
+
+RUN npm install -g pnpm
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+
+# Install Prisma globally for CLI access
+RUN npm install -g prisma
+
+COPY . .
+
+# Generate Prisma Client
+RUN pnpm prisma generate
+
+RUN pnpm run build
+
+# Use ARG for build-time port and ENV for runtime
+ARG PORT=5000
+ENV PORT=$PORT
+
+EXPOSE ${PORT}
+
+# Use a shell script to wait for the database and start the application
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
