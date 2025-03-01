@@ -1,0 +1,7 @@
+dist
+.env 
+coverage
+**/*.test.js
+node_modules
+uploads
+logs
