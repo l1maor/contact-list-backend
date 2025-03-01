@@ -1,0 +1,21 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  name       String
+  phone      String
+  bio        String?
+  avatar     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // For full-text search, you can create an index via a migration
+  @@index([name, phone, bio], name: "contact_fulltext_idx")
+}
